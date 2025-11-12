@@ -2,6 +2,26 @@
 
 Transform bland show schedule PDFs into beautifully branded documents with Thousand Hills Vacations styling.
 
+## For End Users (Sales Reps)
+
+**Looking to use the app?** See [USER_GUIDE.md](USER_GUIDE.md) for simple instructions.
+
+**Getting the app:**
+- Ask your IT department for the application file
+- Mac: `ThousandHillsScheduleCreator.app`
+- Windows: `ThousandHillsScheduleCreator.exe`
+- Just double-click to run - no installation needed!
+
+## For IT/Administrators
+
+**Need to build and distribute the app?** See [DISTRIBUTION_GUIDE.md](DISTRIBUTION_GUIDE.md) for complete instructions on creating standalone applications for your team.
+
+**Quick build:**
+- Mac: `./build_mac_app.sh`
+- Windows: `build_windows_exe.bat`
+
+---
+
 ## Features
 
 - **PDF Upload**: Simple drag-and-drop or file selection interface
