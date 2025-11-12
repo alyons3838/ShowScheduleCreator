@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thousand Hills Vacations - Show Schedule Creator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="header-bar"></div>
+
+    <div class="container">
+        <header>
+            <h1>Thousand Hills Vacations</h1>
+            <p class="tagline">Your home in the heart of Branson.</p>
+            <h2>Show Schedule Creator</h2>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="instructions">
+                    <h3>Transform Your Schedule</h3>
+                    <p>Upload your plain show schedule PDF and we'll create a beautifully branded version with the Thousand Hills Vacations style.</p>
+                    <ul>
+                        <li>Upload your PDF file (max 16MB)</li>
+                        <li>We'll extract the schedule information</li>
+                        <li>Download your branded, professional PDF</li>
+                    </ul>
+                </div>
+
+                <div class="upload-box" id="uploadBox">
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-text">Drag and drop your PDF here</p>
+                    <p class="upload-subtext">or</p>
+                    <label for="fileInput" class="btn btn-primary">Choose File</label>
+                    <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                </div>
+
+                <div id="progressSection" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p id="progressText">Processing...</p>
+                </div>
+
+                <div id="resultSection" class="result-section" style="display: none;">
+                    <div class="success-icon">✓</div>
+                    <h3>Success!</h3>
+                    <p id="resultMessage"></p>
+                    <div class="button-group">
+                        <button id="previewBtn" class="btn btn-secondary">Preview</button>
+                        <button id="downloadBtn" class="btn btn-primary">Download PDF</button>
+                        <button id="newUploadBtn" class="btn btn-outline">Create Another</button>
+                    </div>
+                </div>
+
+                <div id="errorSection" class="error-section" style="display: none;">
+                    <div class="error-icon">✕</div>
+                    <h3>Error</h3>
+                    <p id="errorMessage"></p>
+                    <button id="retryBtn" class="btn btn-primary">Try Again</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Thousand Hills Vacations. All rights reserved.</p>
+            <p>For reservations: 1-800-BRANSON | ThousandHills.com</p>
+        </footer>
+    </div>
+
+    <div class="footer-bar"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
