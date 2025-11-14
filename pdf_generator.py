@@ -99,6 +99,17 @@ class BrandedPDFGenerator:
         """Create the branded header"""
         elements = []
 
+        # Add logo if available
+        logo_path = os.path.join('static', 'logo.png')
+        if os.path.exists(logo_path):
+            try:
+                logo = Image(logo_path, width=2.5*inch, height=None, kind='proportional')
+                logo.hAlign = 'CENTER'
+                elements.append(logo)
+                elements.append(Spacer(1, 0.2*inch))
+            except Exception:
+                pass  # If logo fails to load, continue without it
+
         # Brand name
         brand_title = Paragraph(f"<b>{BRAND_NAME}</b>", self.styles['BrandTitle'])
         elements.append(brand_title)
