@@ -69,7 +69,7 @@ class BrandedPDFGenerator:
 
         return styles
 
-    def generate_schedule(self, schedule_data: List[Dict[str, Any]], metadata: Dict[str, str]):
+    def generate_schedule(self, schedule_data: Dict[str, Any], metadata: Dict[str, str]):
         """Generate a branded show schedule PDF"""
         doc = SimpleDocTemplate(
             self.output_path,
@@ -139,65 +139,90 @@ class BrandedPDFGenerator:
 
         return elements
 
-    def _create_schedule_table(self, schedule_data: List[Dict[str, Any]]) -> List:
+    def _create_schedule_table(self, schedule_data: Dict[str, Any]) -> List:
         """Create a beautifully formatted schedule table"""
-        if not schedule_data:
-            return [Paragraph("No schedule data available", self.styles['BrandBody'])]
-
         elements = []
 
-        # Determine if we have time-based schedule
-        has_times = any(item.get('time') for item in schedule_data)
+        # Check if we have table data
+        if not schedule_data or schedule_data.get('type') != 'table':
+            return [Paragraph("No schedule data available", self.styles['BrandBody'])]
 
-        if has_times:
-            # Create table with time column
-            table_data = [['Time', 'Show', 'Details']]
+        headers = schedule_data.get('headers', [])
+        rows = schedule_data.get('rows', [])
 
-            for item in schedule_data:
-                row = [
-                    Paragraph(f"<b>{item.get('time', '')}</b>", self.styles['BrandBody']),
-                    Paragraph(item.get('show', ''), self.styles['BrandBody']),
-                    Paragraph(item.get('details', ''), self.styles['BrandBody'])
-                ]
-                table_data.append(row)
+        if not headers or not rows:
+            return [Paragraph("No schedule data available", self.styles['BrandBody'])]
 
-            col_widths = [1.2*inch, 3*inch, 2.3*inch]
+        # Build table data with Paragraph objects for proper formatting
+        table_data = []
+
+        # Add header row (days of the week)
+        header_row = []
+        for header in headers:
+            header_row.append(Paragraph(f"<b>{header}</b>", self.styles['BrandBody']))
+        table_data.append(header_row)
+
+        # Add data rows (times and shows)
+        for row in rows:
+            formatted_row = []
+            for i, cell in enumerate(row):
+                # First column is usually the time - make it bold
+                if i == 0:
+                    formatted_row.append(Paragraph(f"<b>{cell}</b>", self.styles['BrandBody']))
+                else:
+                    # Wrap text for better formatting
+                    formatted_row.append(Paragraph(cell if cell else '', self.styles['BrandBody']))
+            table_data.append(formatted_row)
+
+        # Calculate column widths dynamically based on number of columns
+        num_cols = len(headers)
+        available_width = 6.5 * inch
+
+        if num_cols > 0:
+            # First column (time) gets 1 inch, rest divide remaining space
+            if num_cols == 1:
+                col_widths = [available_width]
+            else:
+                first_col_width = 1.0 * inch
+                remaining_width = available_width - first_col_width
+                other_col_width = remaining_width / (num_cols - 1)
+                col_widths = [first_col_width] + [other_col_width] * (num_cols - 1)
         else:
-            # Create simple list table
-            table_data = [['Show']]
-
-            for item in schedule_data:
-                row = [Paragraph(item.get('show', ''), self.styles['BrandBody'])]
-                table_data.append(row)
-
-            col_widths = [6.5*inch]
+            col_widths = None
 
         # Create and style the table
         table = Table(table_data, colWidths=col_widths, repeatRows=1)
 
         # Apply brand styling
         table.setStyle(TableStyle([
-            # Header row styling
+            # Header row styling (days of the week)
             ('BACKGROUND', (0, 0), (-1, 0), colors.Color(*BRAND_COLORS_RGB['primary_red'])),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.Color(*BRAND_COLORS_RGB['white'])),
             ('FONTNAME', (0, 0), (-1, 0), PRIMARY_FONT_BOLD),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('TOPPADDING', (0, 0), (-1, 0), 10),
 
-            # Data rows styling
-            ('BACKGROUND', (0, 1), (-1, -1), colors.Color(*BRAND_COLORS_RGB['white'])),
+            # First column (times) styling
+            ('BACKGROUND', (0, 1), (0, -1), colors.Color(*BRAND_COLORS_RGB['highlight_yellow'], alpha=0.2)),
+            ('FONTNAME', (0, 1), (0, -1), PRIMARY_FONT_BOLD),
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+
+            # Data cells styling
+            ('BACKGROUND', (1, 1), (-1, -1), colors.Color(*BRAND_COLORS_RGB['white'])),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.Color(*BRAND_COLORS_RGB['charcoal_black'])),
-            ('FONTNAME', (0, 1), (-1, -1), PRIMARY_FONT),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('FONTNAME', (1, 1), (-1, -1), PRIMARY_FONT),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('TOPPADDING', (0, 1), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-            ('LEFTPADDING', (0, 0), (-1, -1), 10),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 1), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
 
-            # Alternating row colors
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1),
+            # Alternating row colors (skip header)
+            ('ROWBACKGROUNDS', (1, 1), (-1, -1),
              [colors.Color(*BRAND_COLORS_RGB['white']),
               colors.Color(0.95, 0.95, 0.95)]),
 
